@@ -1,16 +1,16 @@
 "use client";
 
 import type { Alert } from "@/lib/types";
-import { Badge, Card } from "./ui";
+import { Badge, Card, Dot } from "./ui";
 
-function severityTone(sev?: string): "red" | "amber" | "sky" | "muted" {
+function severityTone(sev?: string): "critical" | "amber" | "cyan" | "muted" {
   switch (sev) {
     case "critical":
-      return "red";
+      return "critical";
     case "warning":
       return "amber";
     case "info":
-      return "sky";
+      return "cyan";
     default:
       return "muted";
   }
@@ -36,9 +36,13 @@ export function AlertsPanel({
       title="Live alerts"
       right={
         connected ? (
-          <Badge tone="green">● live</Badge>
+          <Badge tone="cyan">
+            <Dot tone="cyan" pulse /> live
+          </Badge>
         ) : (
-          <Badge tone="muted">○ offline</Badge>
+          <Badge tone="muted">
+            <Dot tone="muted" /> offline
+          </Badge>
         )
       }
     >
@@ -49,7 +53,7 @@ export function AlertsPanel({
           {alerts.map((a, i) => (
             <li
               key={a.id ?? i}
-              className="rounded-lg border border-border bg-surface-2 p-3"
+              className="rounded-xl border border-border bg-elevated/60 p-3.5 transition-colors hover:border-border-hover"
             >
               <div className="flex items-center justify-between gap-2">
                 <Badge tone={severityTone(a.severity)}>

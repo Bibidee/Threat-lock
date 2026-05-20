@@ -4,20 +4,24 @@ import { useState } from "react";
 
 import { useAuth } from "@/lib/auth";
 import type { Health } from "@/lib/types";
-import { Badge, Button, Input } from "./ui";
+import { Badge, Button, Dot, Input } from "./ui";
 import { WalletConnect } from "./WalletConnect";
 
 export function TopBar({ health }: { health: Health | null }) {
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+    <header className="sticky top-0 z-10 border-b border-border bg-background/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3.5">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-600 font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan font-display text-base font-bold text-black shadow-[0_0_28px_-8px_var(--cyan)]">
             TL
           </div>
           <div>
-            <h1 className="text-lg font-semibold leading-tight">Threat-Lock</h1>
-            <p className="text-xs text-muted">Hack detection & emergency pause</p>
+            <h1 className="font-display text-lg font-semibold leading-tight tracking-tight">
+              Threat-Lock
+            </h1>
+            <p className="text-[0.7rem] uppercase tracking-[0.16em] text-muted">
+              Security Command Centre
+            </p>
           </div>
         </div>
 
@@ -35,14 +39,16 @@ function HealthBadges({ health }: { health: Health | null }) {
   if (!health) return <Badge tone="amber">backend offline</Badge>;
   return (
     <>
-      <Badge tone="sky">{health.genlayer_network}</Badge>
-      <Badge tone={health.contract_configured ? "green" : "muted"}>
+      <Badge tone="cyan">
+        <Dot tone="cyan" pulse /> {health.genlayer_network}
+      </Badge>
+      <Badge tone={health.contract_configured ? "cyan" : "muted"}>
         contract {health.contract_configured ? "set" : "—"}
       </Badge>
-      <Badge tone={health.write_enabled ? "green" : "amber"}>
+      <Badge tone={health.write_enabled ? "cyan" : "amber"}>
         writes {health.write_enabled ? "on" : "off"}
       </Badge>
-      <Badge tone={health.firebase_enabled ? "green" : "muted"}>
+      <Badge tone={health.firebase_enabled ? "cyan" : "muted"}>
         firebase {health.firebase_enabled ? "on" : "off"}
       </Badge>
     </>
@@ -62,7 +68,7 @@ function AuthControl() {
   if (user) {
     return (
       <div className="flex items-center gap-2">
-        <Badge tone="green">{user.email ?? "signed in"}</Badge>
+        <Badge tone="cyan">{user.email ?? "signed in"}</Badge>
         <Button variant="ghost" onClick={() => logout()}>
           Sign out
         </Button>
@@ -101,7 +107,7 @@ function AuthControl() {
       <Button loading={busy} onClick={doLogin}>
         Sign in
       </Button>
-      {err && <span className="text-xs text-red-400">{err}</span>}
+      {err && <span className="text-xs text-critical">{err}</span>}
     </div>
   );
 }

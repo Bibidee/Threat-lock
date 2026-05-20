@@ -68,8 +68,8 @@ export default function Dashboard() {
   return (
     <>
       <TopBar health={health} />
-      <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-6 py-6">
-        <div className="grid gap-6 lg:grid-cols-3">
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-8 sm:px-6 lg:space-y-8 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           <div className="lg:col-span-1">
             <StatusPanel status={status} error={statusErr} loading={loading} />
           </div>
@@ -83,12 +83,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <AlertsPanel alerts={alerts} connected={connected} />
           <EventsTable events={events} error={eventsErr} />
         </div>
       </main>
-      <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted">
+      <footer className="border-t border-border px-6 py-5 text-center text-[0.7rem] uppercase tracking-[0.16em] text-muted">
         Threat-Lock · GenLayer StudioNet · built locally
       </footer>
     </>

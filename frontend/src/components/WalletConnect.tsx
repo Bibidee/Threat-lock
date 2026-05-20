@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Badge, Button } from "./ui";
+import { Badge, Button, Dot } from "./ui";
 
 interface EthProvider {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -59,8 +59,8 @@ export function WalletConnect() {
   if (!available) return <Badge tone="muted">No wallet</Badge>;
   if (account)
     return (
-      <Badge tone="sky">
-        {account.slice(0, 6)}…{account.slice(-4)}
+      <Badge tone="cyan">
+        <Dot tone="cyan" /> {account.slice(0, 6)}…{account.slice(-4)}
       </Badge>
     );
   return (

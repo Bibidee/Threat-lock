@@ -5,7 +5,7 @@ import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { TxResponse } from "@/lib/types";
-import { Badge, Button, Card, Input, Textarea } from "./ui";
+import { Badge, Button, Card, Dot, Input, Textarea } from "./ui";
 
 type Msg = { ok: boolean; text: string } | null;
 
@@ -44,7 +44,13 @@ export function ControlPanel({ onAction }: { onAction: () => void }) {
     <Card
       title="Emergency controls"
       right={
-        disabled ? <Badge tone="amber">sign in to control</Badge> : <Badge tone="sky">ready</Badge>
+        disabled ? (
+          <Badge tone="amber">sign in to control</Badge>
+        ) : (
+          <Badge tone="cyan">
+            <Dot tone="cyan" pulse /> ready
+          </Badge>
+        )
       }
     >
       {!configured && (
@@ -55,10 +61,10 @@ export function ControlPanel({ onAction }: { onAction: () => void }) {
 
       {msg && (
         <div
-          className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
+          className={`mb-5 rounded-xl border px-4 py-3 text-sm ${
             msg.ok
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-              : "border-red-500/40 bg-red-500/10 text-red-300"
+              ? "border-cyan/40 bg-cyan/10 text-cyan"
+              : "border-critical/40 bg-critical/10 text-critical"
           }`}
         >
           {msg.text}
@@ -67,8 +73,8 @@ export function ControlPanel({ onAction }: { onAction: () => void }) {
 
       <div className="grid gap-5 md:grid-cols-2">
         {/* Pause / Unpause */}
-        <div className="space-y-2">
-          <Label>Manual pause</Label>
+        <div className="danger-aura space-y-2.5 rounded-2xl border border-critical/25 bg-critical/[0.05] p-4">
+          <Label tone="critical">Emergency pause — kill switch</Label>
           <Input
             value={pauseReason}
             onChange={(e) => setPauseReason(e.target.value)}
@@ -189,8 +195,22 @@ export function ControlPanel({ onAction }: { onAction: () => void }) {
   );
 }
 
-function Label({ children }: { children: React.ReactNode }) {
-  return <label className="block text-xs font-medium text-muted">{children}</label>;
+function Label({
+  children,
+  tone = "muted",
+}: {
+  children: React.ReactNode;
+  tone?: "muted" | "critical";
+}) {
+  return (
+    <label
+      className={`block text-[0.7rem] font-semibold uppercase tracking-wider ${
+        tone === "critical" ? "text-critical" : "text-muted"
+      }`}
+    >
+      {children}
+    </label>
+  );
 }
 
 function short(h: string): string {

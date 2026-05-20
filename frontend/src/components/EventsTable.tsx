@@ -9,11 +9,11 @@ function fmtTime(ts: number): string {
 }
 
 function kindColor(kind: string): string {
-  if (kind.includes("PAUSED")) return "text-red-400";
-  if (kind === "UNPAUSED") return "text-emerald-400";
-  if (kind.includes("AI")) return "text-sky-400";
-  if (kind.includes("ADMIN")) return "text-violet-400";
-  return "text-amber-400";
+  if (kind.includes("PAUSED")) return "text-critical";
+  if (kind === "UNPAUSED") return "text-cyan";
+  if (kind.includes("AI")) return "text-cyan";
+  if (kind.includes("ADMIN")) return "text-secondary";
+  return "text-amber";
 }
 
 export function EventsTable({
@@ -26,18 +26,20 @@ export function EventsTable({
   return (
     <Card title="On-chain audit log">
       {error ? (
-        <p className="text-sm text-amber-400">{error}</p>
+        <div className="rounded-xl border border-amber/25 bg-amber/[0.06] px-4 py-3 text-sm text-amber">
+          {error}
+        </div>
       ) : events.length === 0 ? (
         <p className="text-sm text-muted">No events recorded on-chain yet.</p>
       ) : (
         <div className="max-h-[28rem] overflow-y-auto">
           <table className="w-full text-left text-sm">
-            <thead className="sticky top-0 bg-surface text-xs uppercase text-muted">
+            <thead className="sticky top-0 bg-card text-[0.65rem] uppercase tracking-wider text-muted">
               <tr>
-                <th className="py-2 pr-3">Kind</th>
-                <th className="py-2 pr-3">Score</th>
-                <th className="py-2 pr-3">Reason</th>
-                <th className="py-2">Time</th>
+                <th className="py-2.5 pr-3 font-semibold">Kind</th>
+                <th className="py-2.5 pr-3 font-semibold">Score</th>
+                <th className="py-2.5 pr-3 font-semibold">Reason</th>
+                <th className="py-2.5 font-semibold">Time</th>
               </tr>
             </thead>
             <tbody>
@@ -45,13 +47,16 @@ export function EventsTable({
                 .slice()
                 .reverse()
                 .map((e, i) => (
-                  <tr key={i} className="border-t border-border/60 align-top">
-                    <td className={`py-2 pr-3 font-medium ${kindColor(e.kind)}`}>
+                  <tr
+                    key={i}
+                    className="border-t border-border/60 align-top transition-colors hover:bg-white/[0.02]"
+                  >
+                    <td className={`py-2.5 pr-3 font-semibold ${kindColor(e.kind)}`}>
                       {e.kind}
                     </td>
-                    <td className="py-2 pr-3 tabular-nums">{e.score}</td>
-                    <td className="py-2 pr-3 text-muted">{e.reason}</td>
-                    <td className="whitespace-nowrap py-2 text-xs text-muted">
+                    <td className="py-2.5 pr-3 tabular-nums text-secondary">{e.score}</td>
+                    <td className="py-2.5 pr-3 text-secondary">{e.reason}</td>
+                    <td className="whitespace-nowrap py-2.5 text-xs text-muted">
                       {fmtTime(e.timestamp)}
                     </td>
                   </tr>

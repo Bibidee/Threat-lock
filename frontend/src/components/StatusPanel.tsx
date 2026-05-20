@@ -1,7 +1,7 @@
 "use client";
 
 import type { Status } from "@/lib/types";
-import { Badge, Card } from "./ui";
+import { Badge, Card, Dot } from "./ui";
 import { ThreatGauge } from "./ThreatGauge";
 
 export function StatusPanel({
@@ -21,24 +21,30 @@ export function StatusPanel({
           <Badge tone="muted">refreshing…</Badge>
         ) : status ? (
           status.paused ? (
-            <Badge tone="red">● PAUSED</Badge>
+            <Badge tone="critical">
+              <Dot tone="critical" pulse /> PAUSED
+            </Badge>
           ) : (
-            <Badge tone="green">● ACTIVE</Badge>
+            <Badge tone="cyan">
+              <Dot tone="cyan" pulse /> ACTIVE
+            </Badge>
           )
         ) : null
       }
     >
       {error ? (
-        <p className="text-sm text-amber-400">{error}</p>
+        <div className="rounded-xl border border-amber/25 bg-amber/[0.06] px-4 py-3 text-sm text-amber">
+          {error}
+        </div>
       ) : !status ? (
         <p className="text-sm text-muted">No contract data yet.</p>
       ) : (
         <div className="space-y-5">
           <div
-            className={`rounded-lg border p-4 text-center text-lg font-semibold ${
+            className={`rounded-xl border p-4 text-center text-base font-semibold tracking-tight ${
               status.paused
-                ? "border-red-500/40 bg-red-500/10 text-red-400"
-                : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                ? "tl-critical-glow border-critical/40 bg-critical/10 text-critical"
+                : "border-cyan/30 bg-cyan/[0.07] text-cyan"
             }`}
           >
             {status.paused ? "EMERGENCY PAUSE ACTIVE" : "System operating normally"}
@@ -75,9 +81,9 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="rounded-lg bg-surface-2 px-3 py-2">
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className={`mt-0.5 break-all ${mono ? "font-mono text-xs" : ""}`}>
+    <div className="rounded-xl border border-border bg-elevated/60 px-3.5 py-2.5">
+      <dt className="text-[0.65rem] uppercase tracking-wider text-muted">{label}</dt>
+      <dd className={`mt-1 break-all text-secondary ${mono ? "font-mono text-xs" : ""}`}>
         {value}
       </dd>
     </div>
