@@ -81,11 +81,45 @@ AI verification path.
 - `Contract not found` → run pytest from the repo root so `contracts/threat_lock.py` resolves.
 - Python version errors → make sure you're calling `.\.venv\Scripts\python.exe`, not the global 3.11.
 
+## 5. Backend (FastAPI)
+
+Install backend deps into the same venv and run the API:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+.\.venv\Scripts\python.exe backend\run.py
+```
+
+**Expected:** structured JSON logs, then the API on http://localhost:8000.
+Open http://localhost:8000/docs for the interactive Swagger UI.
+
+The backend runs in **degraded-but-healthy** mode until you add credentials:
+- No `.env` / no operator key → contract **writes disabled** (reads need a deployed address).
+- No `firebase/serviceAccountKey.json` → alerts kept **in-memory**, auth uses a dev stub.
+
+Smoke-test the API without starting a server:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest backend\tests -v
+```
+
+Run **everything** (contract + backend):
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -v
+```
+
+**Endpoints**
+- `GET /health` — system/integration status
+- `GET /contract/status`, `GET /contract/events?limit=25` — reads
+- `POST /contract/report|verify|pause|unpause|threshold` — control actions (auth)
+- `POST /contract/admin/add|remove` — admin management (auth)
+- `GET /alerts?limit=50`, `WS /ws/alerts` — alert history + live stream
+
 ## Next sections (added as we build)
 
-- [ ] 5. GenLayer account + StudioNet faucet
-- [ ] 6. Deploy the Intelligent Contract to StudioNet
-- [ ] 7. Backend (FastAPI + Firebase)
+- [ ] 6. GenLayer account + StudioNet faucet
+- [ ] 7. Deploy the Intelligent Contract to StudioNet
 - [ ] 8. Monitoring workers
 - [ ] 9. Frontend (Next.js)
 - [ ] 10. End-to-end run
