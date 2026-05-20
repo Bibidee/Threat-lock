@@ -29,13 +29,21 @@ import json
 # -----------------------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------------------
-def _extract_json(text: str) -> dict:
+def _extract_json(text) -> dict:
     """Pull a JSON object out of an LLM response.
 
     LLMs often wrap JSON in ```json ... ``` fences or add prose. We locate the
     outermost { ... } and parse that. Runs inside the leader's non-deterministic
-    block, so it only needs to be deterministic *given* the response text.
+    block, so it only needs to be deterministic *given* the response.
+
+    Accepts a str (real network), bytes, or an already-parsed dict (some test
+    harnesses hand back the decoded object) so the same code path works both
+    on-chain and under Direct Mode tests.
     """
+    if isinstance(text, dict):
+        return text
+    if isinstance(text, (bytes, bytearray)):
+        text = text.decode("utf-8", "replace")
     t = text.strip()
     start = t.find("{")
     end = t.rfind("}")
