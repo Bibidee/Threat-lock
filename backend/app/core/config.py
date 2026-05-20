@@ -10,9 +10,10 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # Repo root = .../Threat-lock  (this file is backend/app/core/config.py)
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -43,7 +44,9 @@ class Settings(BaseSettings):
     api_port: int = 8000
     api_env: str = "development"
     log_level: str = "INFO"
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:3000"]
+    )
 
     # ---- Monitoring ----
     threat_pause_threshold: int = 75

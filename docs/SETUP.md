@@ -116,10 +116,37 @@ Run **everything** (contract + backend):
 - `POST /contract/admin/add|remove` — admin management (auth)
 - `GET /alerts?limit=50`, `WS /ws/alerts` — alert history + live stream
 
+## 6. Monitoring workers
+
+The monitor watches activity + news, scores threats, and pushes them to the
+backend. **Start the backend first**, then in a second terminal:
+
+```powershell
+# one cycle (great for testing):
+.\.venv\Scripts\python.exe -m monitoring.run --once --simulate
+# continuous loop:
+.\.venv\Scripts\python.exe -m monitoring.run --simulate
+# use real sources (set METRICS_URL / NEWS_FEED_URLS in .env first):
+.\.venv\Scripts\python.exe -m monitoring.run --no-simulate
+```
+
+**Expected (simulate):** JSON logs showing `backend.health ok`, `cycle.signals`,
+and dispatches. Before a contract is deployed you'll see
+`dispatch.writes_disabled` (HTTP 409) — that's correct; the monitor is reaching
+the backend and the backend correctly refuses to write with no contract/key.
+
+**Detectors**
+- `volume_spike` — z-score anomaly on transfer volume → `/contract/report`
+- `suspicious_wallet` — blacklist hits + outflow concentration → `/contract/report`
+- `news_feed` — watchlist terms in security news → `/contract/verify` (AI path)
+
+Tune via `.env`: `MONITOR_INTERVAL_SECONDS`, `MONITOR_REPORT_FLOOR`,
+`VOLUME_WINDOW`, `VOLUME_Z_THRESHOLD`, `WATCHLIST_TERMS`, `WALLET_BLACKLIST`,
+`NEWS_FEED_URLS`, `METRICS_URL`.
+
 ## Next sections (added as we build)
 
-- [ ] 6. GenLayer account + StudioNet faucet
-- [ ] 7. Deploy the Intelligent Contract to StudioNet
-- [ ] 8. Monitoring workers
+- [ ] 7. GenLayer account + StudioNet faucet
+- [ ] 8. Deploy the Intelligent Contract to StudioNet
 - [ ] 9. Frontend (Next.js)
 - [ ] 10. End-to-end run
