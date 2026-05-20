@@ -144,9 +144,32 @@ Tune via `.env`: `MONITOR_INTERVAL_SECONDS`, `MONITOR_REPORT_FLOOR`,
 `VOLUME_WINDOW`, `VOLUME_Z_THRESHOLD`, `WATCHLIST_TERMS`, `WALLET_BLACKLIST`,
 `NEWS_FEED_URLS`, `METRICS_URL`.
 
+## 7. Frontend (Next.js dashboard)
+
+```powershell
+cd C:\Users\ojiku\Threat-lock\frontend
+Copy-Item .env.local.example .env.local   # optional; defaults work for local dev
+npm install                                # first time only
+npm run dev
+```
+
+Open http://localhost:3000. With the backend running you'll see live status,
+the threat gauge, emergency controls, the on-chain audit log, and a live alerts
+feed (WebSocket). Run the monitor too to watch alerts stream in.
+
+- **Auth:** if `NEXT_PUBLIC_FIREBASE_*` is blank, the dashboard runs in **dev
+  mode** (no login, controls enabled). Fill them in to require admin sign-in.
+- **Wallet:** the top bar has an injected-wallet connect (MetaMask-style). Direct
+  on-chain calls via `genlayer-js` get wired in the deploy step.
+- **Backend URL:** set `NEXT_PUBLIC_BACKEND_URL` if the API isn't on :8000.
+
+Production build / sanity check:
+```powershell
+npm run build
+```
+
 ## Next sections (added as we build)
 
-- [ ] 7. GenLayer account + StudioNet faucet
-- [ ] 8. Deploy the Intelligent Contract to StudioNet
-- [ ] 9. Frontend (Next.js)
+- [ ] 8. GenLayer account + StudioNet faucet
+- [ ] 9. Deploy the Intelligent Contract to StudioNet
 - [ ] 10. End-to-end run
