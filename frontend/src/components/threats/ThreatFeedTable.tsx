@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge, Card, riskTone, verdictTone } from "@/components/ui";
+import { formatUtc } from "@/lib/format";
 import type { ThreatReport } from "@/types";
 
 export function ThreatFeedTable({ threats }: { threats: ThreatReport[] }) {
@@ -33,7 +34,7 @@ export function ThreatFeedTable({ threats }: { threats: ThreatReport[] }) {
                   <td className="py-2.5 pr-3 tabular-nums">{t.local_score}{t.genlayer_score != null ? ` / ${t.genlayer_score}` : ""}</td>
                   <td className="py-2.5 pr-3"><Badge tone={verdictTone(t.genlayer_verdict)}>{t.genlayer_verdict}</Badge></td>
                   <td className="py-2.5 pr-3">{t.pause_triggered ? <Badge tone="red">yes</Badge> : <span className="text-muted">—</span>}</td>
-                  <td className="whitespace-nowrap py-2.5 text-xs text-muted">{new Date(t.created_at).toLocaleString()}</td>
+                  <td className="whitespace-nowrap py-2.5 text-xs text-muted">{formatUtc(t.created_at)}</td>
                 </tr>
               ))}
             </tbody>

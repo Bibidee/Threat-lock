@@ -1,0 +1,18 @@
+# Fly.io config for the Threat-Lock backend.
+# `app` and `primary_region` are patched from .env (FLY_APP / FLY_REGION) by
+# scripts/deploy.py before each deploy. Secrets are set via `flyctl secrets`.
+app = "threatlock-api-ojiku"
+primary_region = "iad"
+
+[build]
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

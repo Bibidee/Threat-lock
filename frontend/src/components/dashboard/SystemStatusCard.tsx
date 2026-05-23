@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge, Card, Dot, riskTone, verdictTone } from "@/components/ui";
+import { formatUtc } from "@/lib/format";
 import type { SystemStatus } from "@/types";
 
 export function SystemStatusCard({
@@ -48,7 +49,7 @@ export function SystemStatusCard({
               <dd className="mt-1 text-text">{status.last_action}</dd>
             </div>
           </dl>
-          <p className="text-xs text-muted">Updated {new Date(status.updated_at).toLocaleString()}</p>
+          <p className="text-xs text-muted">Updated {formatUtc(status.updated_at)}</p>
         </div>
       )}
     </Card>

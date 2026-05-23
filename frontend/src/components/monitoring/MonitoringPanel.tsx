@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge, Button, Card, Dot } from "@/components/ui";
+import { formatUtc } from "@/lib/format";
 import { useMonitoring } from "@/hooks/useMonitoring";
 
 export function MonitoringPanel() {
@@ -59,7 +60,7 @@ export function MonitoringPanel() {
               <li key={r.id} className="rounded-lg border border-border bg-slate-50 p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <Badge tone={r.status === "completed" ? "green" : "amber"}>{r.status}</Badge>
-                  <span className="text-xs text-muted">{new Date(r.started_at).toLocaleString()}</span>
+                  <span className="text-xs text-muted">{formatUtc(r.started_at)}</span>
                 </div>
                 <p className="mt-1.5 text-slate-600">
                   sources: {r.sources_checked.join(", ") || "none"} · signals: {r.signals_found} · ingested: {r.threats_ingested}
