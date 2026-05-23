@@ -1,88 +1,86 @@
 # Threat-Lock
 
-**Hack Detection & Emergency Pause System, built on GenLayer.**
+**AI-native emergency response layer for protocols, on GenLayer.**
 
-Threat-Lock monitors blockchain activity, protocol metrics, exploit reports, and
-news feeds; uses **GenLayer Intelligent Contracts + LLM reasoning** to detect
-suspicious behaviour; and **automatically triggers an on-chain emergency pause**
-when a threat is confirmed. Admins are notified in real time and every alert is
-persisted in Firebase.
+Threat-Lock monitors protocol activity, explorer signals, wallet behaviour, and
+security/exploit news. When a serious threat is detected, the backend sends the
+evidence to a **GenLayer Intelligent Contract** on StudioNet, whose AI judge
+returns **SAFE / SUSPICIOUS / CRITICAL**. A CRITICAL verdict auto-triggers an
+on-chain **emergency pause**. Firebase persists incidents, audit logs, and pause
+events; a premium dashboard lets protocol admins monitor and recover.
+
+Built for **DeFi protocols, DAO treasuries, bridges, lending/RWA/stablecoin
+teams, and security/admin ops** — a B2B security operations console, not a retail app.
 
 ---
 
-## Architecture (high level)
+## Architecture
 
 ```
-                         news / exploit feeds
-                         blockchain explorers
-                                  │
-                                  ▼
-        ┌──────────────────────────────────────────────┐
-        │  monitoring workers  (Python, scheduled)       │
-        │  - volume-spike detection                      │
-        │  - suspicious-wallet detection                 │
-        │  - news / exploit feed parsing                 │
-        └───────────────┬──────────────────────────────┘
-                        │ threat signals
-                        ▼
-        ┌──────────────────────────────────────────────┐
-        │  FastAPI backend                               │
-        │  - REST + WebSocket                            │
-        │  - Firebase (Firestore + Auth)                 │
-        │  - GenLayer client (genlayer_py)               │
-        └───────────────┬──────────────────────────────┘
-                        │ submit_threat / pause / unpause
-                        ▼
-        ┌──────────────────────────────────────────────┐
-        │  GenLayer Intelligent Contract (GenVM)         │
-        │  - threat scoring + LLM anomaly verification   │
-        │  - admin authorization                         │
-        │  - auto-freeze / recovery                      │
-        │  - event emission                              │
-        └──────────────────────────────────────────────┘
-                        ▲
-                        │ live status / controls
-        ┌───────────────┴──────────────────────────────┐
-        │  Next.js dashboard (Tailwind + TS)             │
-        │  dashboard · alerts · pause controls · logs    │
-        └────────────────────────────────────────────────┘
+monitoring worker ─┐
+explorer/news/RSS ─┤ POST /api/threats/ingest
+dashboard buttons ─┘            │
+                                ▼
+        FastAPI backend  (routes → services → integrations → repositories)
+          • deterministic scoring (low/medium/critical)
+          • critical → GenLayer AI judge (StudioNet)
+          • Firebase persistence (Firestore, in-memory fallback)
+                                │
+            ┌───────────────────┼────────────────────┐
+            ▼                   ▼                     ▼
+   GenLayer contract     Firebase Firestore     Next.js dashboard
+   (AI verdict + pause)  (incidents/audit)      (status/threats/monitoring/admin)
 ```
 
-## Tech stack
+Layering (strict): `routes/ → services/ → integrations/ → repositories/`.
 
-| Layer       | Tech                                                        |
-|-------------|-------------------------------------------------------------|
-| Contracts   | GenLayer Intelligent Contracts (Python / GenVM) on StudioNet|
-| Backend     | Python, FastAPI, `genlayer_py`, Firebase Admin SDK          |
-| Monitoring  | Python background workers + scheduler                       |
-| Frontend    | Next.js, Tailwind CSS, TypeScript, `genlayer-js`            |
-| Data / Auth | Firebase Firestore + Firebase Authentication               |
+## Components
 
-> **Deploy target:** GenLayer **StudioNet** (remote RPC, StudioNet test tokens).
-> No Docker. Local development only.
+| Layer | Tech | Location |
+|-------|------|----------|
+| Contract | GenLayer Intelligent Contract (Python/GenVM) | `contracts/threat_lock.py` |
+| Backend | FastAPI, genlayer_py, firebase-admin, httpx | `backend/` |
+| Monitoring | explorer + RSS/security clients, worker, scheduler | `backend/app/integrations/`, `monitoring/` |
+| Frontend | Next.js + Tailwind + TypeScript | `frontend/` |
+| Data | Firebase Firestore | `firebase/` |
 
-## Folder structure
+## Quick start (Windows PowerShell)
 
+```powershell
+cd C:\Users\ojiku\Threat-lock
+
+# 1) Backend (Python 3.12 venv already created at .venv)
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+.\.venv\Scripts\python.exe backend\run.py            # API on http://localhost:8000  (/docs)
+
+# 2) Frontend (new terminal)
+cd frontend
+npm install
+npm run dev                                           # http://localhost:3000
+
+# 3) Monitoring worker (new terminal) - push demo signals
+cd C:\Users\ojiku\Threat-lock
+.\.venv\Scripts\python.exe -m monitoring.worker --mock
 ```
-Threat-lock/
-├── contracts/      GenLayer Intelligent Contracts + contract tests
-├── backend/        FastAPI app (api / core / services / models / workers)
-├── monitoring/     Standalone monitoring logic & runners
-├── frontend/       Next.js dashboard
-├── firebase/       Firebase config, Firestore rules, service account (gitignored)
-├── scripts/        Deploy / utility scripts (Python, Windows-friendly)
-├── deployment/     Deployment configs & notes
-├── configs/        Shared config files
-├── docs/           Project documentation
-├── tests/          Cross-cutting / integration tests
-└── logs/           Runtime logs (gitignored)
-```
 
-## Getting started
+## Configuration
 
-Setup is documented step by step in [`docs/SETUP.md`](docs/SETUP.md) as we build.
-Environment variables are described in [`.env.example`](.env.example).
+- Backend env: root `.env` (template `backend/.env.example`).
+- Frontend env: `frontend/.env.local` (template `frontend/.env.example`).
+- GenLayer: `GENLAYER_MODE=real`, `GENLAYER_CONTRACT_ADDRESS`, `GENLAYER_PRIVATE_KEY` (admin key for admin actions), `GENLAYER_RPC_URL`.
+- Firebase: drop `firebase/serviceAccountKey.json` (or set `FIREBASE_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY`).
+
+## Docs
+
+- [`docs/architecture.md`](docs/architecture.md) — system design & flow
+- [`docs/api.md`](docs/api.md) — REST API reference
+- [`docs/frontend-backend-call-map.md`](docs/frontend-backend-call-map.md) — every UI action → endpoint → effect
+- [`docs/genlayer-studionet.md`](docs/genlayer-studionet.md) — contract deploy + wiring
+- [`docs/monitoring.md`](docs/monitoring.md) — monitoring sources & worker
+- [`docs/demo-flow.md`](docs/demo-flow.md) — end-to-end demo script
+- [`docs/testing.md`](docs/testing.md) — test commands
 
 ## Status
 
-🚧 Under active development — built incrementally, contract-first.
+Live on GenLayer StudioNet. Contract: `0x2FBEb2780E3815541745c90a6B55A3fA88b67cf3`.
+Built locally; never auto-pushed to git.

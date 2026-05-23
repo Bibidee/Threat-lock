@@ -3,8 +3,8 @@
 Run from the repo root with the project venv:
     .venv\\Scripts\\python.exe backend\\run.py
 
-This puts `backend/` on sys.path so the `app` package imports resolve, then
-starts uvicorn using host/port from your .env. Use --reload during development.
+Puts backend/ on sys.path so `app.*` imports resolve, then starts uvicorn.
+Runs single-process (no reload) for stable behaviour with the .env-driven config.
 """
 from __future__ import annotations
 
@@ -17,19 +17,13 @@ if str(BACKEND_DIR) not in sys.path:
 
 import uvicorn  # noqa: E402
 
-from app.core.config import get_settings  # noqa: E402
+from app.config import get_settings  # noqa: E402
 
 
 def main() -> None:
-    settings = get_settings()
-    reload = settings.api_env == "development"
-    uvicorn.run(
-        "app.main:app",
-        host=settings.api_host,
-        port=settings.api_port,
-        reload=reload,
-        app_dir=str(BACKEND_DIR),
-    )
+    s = get_settings()
+    uvicorn.run("app.main:app", host=s.backend_host, port=s.backend_port,
+                app_dir=str(BACKEND_DIR), log_level="info")
 
 
 if __name__ == "__main__":

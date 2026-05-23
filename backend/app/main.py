@@ -1,9 +1,8 @@
-"""Threat-Lock backend — FastAPI application entrypoint.
+"""Threat-Lock backend - FastAPI application entrypoint.
 
-Run (from repo root, using the project venv):
+Run from repo root with the project venv:
     .venv\\Scripts\\python.exe backend\\run.py
-
-Then open http://localhost:8000/docs for the interactive API.
+Then open http://localhost:8000/docs
 """
 from __future__ import annotations
 
@@ -12,30 +11,28 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import routes_alerts, routes_contract, routes_health
-from app.core.config import get_settings
-from app.core.logging import get_logger, setup_logging
-from app.services.firebase_client import get_firebase_service
-from app.services.genlayer_client import get_chain_service
+from app.config import get_settings
+from app.integrations.genlayer_client import get_genlayer_client
+from app.repositories.firebase_repository import get_repository
+from app.routes import admin, apikeys, genlayer, health, monitoring, system, threats, vault
+from app.utils.logging import get_logger, setup_logging
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
-    setup_logging(settings.log_level)
+    setup_logging("INFO")
     log = get_logger("startup")
-    # Warm the singletons so any config problems surface at boot, not first call.
-    fb = get_firebase_service()
-    chain = get_chain_service()
+    repo = get_repository()
+    gl = get_genlayer_client()
     log.info(
         "backend.started",
         extra={
-            "env": settings.api_env,
-            "network": settings.genlayer_network,
-            "contract_configured": bool(settings.threatlock_contract_address),
-            "write_enabled": settings.genlayer_write_enabled,
-            "firebase_enabled": fb.enabled,
-            "operator": chain.operator_address,
+            "env": settings.app_env,
+            "genlayer_mode": gl.mode,
+            "contract": settings.genlayer_contract_address or None,
+            "firebase_backend": repo.backend,
+            "admin_wallet": settings.admin_wallet_address or None,
         },
     )
     yield
@@ -46,11 +43,10 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
         title="Threat-Lock API",
-        version="0.1.0",
-        description="Hack detection & emergency pause system on GenLayer.",
+        version="1.0.0",
+        description="AI-native emergency response layer for protocols, on GenLayer.",
         lifespan=lifespan,
     )
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -58,14 +54,12 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    app.include_router(routes_health.router)
-    app.include_router(routes_contract.router)
-    app.include_router(routes_alerts.router)
+    for module in (health, system, threats, admin, apikeys, genlayer, monitoring, vault):
+        app.include_router(module.router)
 
     @app.get("/", tags=["health"])
     async def root() -> dict:
-        return {"name": "Threat-Lock API", "docs": "/docs", "health": "/health"}
+        return {"name": "Threat-Lock API", "docs": "/docs", "health": "/api/health"}
 
     return app
 
